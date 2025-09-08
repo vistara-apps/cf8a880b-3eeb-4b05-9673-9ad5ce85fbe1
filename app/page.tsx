@@ -5,15 +5,11 @@ import { AppShell } from '@/components/AppShell';
 import { AgentChat } from '@/components/AgentChat';
 import { TransactionHistory } from '@/components/TransactionHistory';
 import { PaymentModal } from '@/components/PaymentModal';
-import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
-import { Name, Avatar } from '@coinbase/onchainkit/identity';
-import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { Transaction } from '@/lib/types';
 import { generateTransactionId } from '@/lib/utils';
 import { MessageCircle, History, Wallet as WalletIcon } from 'lucide-react';
 
 export default function PayChatApp() {
-  const { setFrameReady } = useMiniKit();
   const [activeTab, setActiveTab] = useState<'chat' | 'history' | 'wallet'>('chat');
   const [currentUserId] = useState('user123'); // Mock current user
   const [paymentModal, setPaymentModal] = useState<{
@@ -53,10 +49,6 @@ export default function PayChatApp() {
       status: 'pending',
     },
   ]);
-
-  useEffect(() => {
-    setFrameReady();
-  }, [setFrameReady]);
 
   const handlePaymentInitiated = (paymentData: any) => {
     setPaymentModal({
@@ -118,12 +110,7 @@ export default function PayChatApp() {
       title={activeTab === 'chat' ? 'PayChat' : activeTab === 'history' ? 'Transaction History' : 'Wallet'}
       rightAction={
         activeTab === 'wallet' ? (
-          <Wallet>
-            <ConnectWallet>
-              <Avatar className="h-6 w-6" />
-              <Name />
-            </ConnectWallet>
-          </Wallet>
+          <div className="text-sm text-text-secondary">Connect Wallet</div>
         ) : undefined
       }
     >
@@ -155,12 +142,9 @@ export default function PayChatApp() {
               <p className="text-body text-text-secondary mb-6">
                 Connect your wallet to start sending and receiving payments on Base.
               </p>
-              <Wallet>
-                <ConnectWallet className="w-full">
-                  <Avatar className="h-6 w-6" />
-                  <Name />
-                </ConnectWallet>
-              </Wallet>
+              <button className="btn-primary w-full">
+                Connect Wallet
+              </button>
             </div>
           </div>
         )}

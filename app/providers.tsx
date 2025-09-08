@@ -1,16 +1,12 @@
 'use client';
 
-import { MiniKitProvider } from '@coinbase/onchainkit/minikit';
-import { base } from 'wagmi/chains';
 import { type ReactNode } from 'react';
 
+// Simple provider wrapper for now - OnchainKit integration can be added later
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <MiniKitProvider
-      chain={base}
-      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY || 'cdp_demo_key'}
-    >
+    <div className="min-h-screen bg-bg">
       {children}
-    </MiniKitProvider>
+    </div>
   );
 }
