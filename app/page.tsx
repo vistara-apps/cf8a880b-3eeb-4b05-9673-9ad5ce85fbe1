@@ -5,58 +5,47 @@ import { AppShell } from '@/components/AppShell';
 import { AgentChat } from '@/components/AgentChat';
 import { TransactionHistory } from '@/components/TransactionHistory';
 import { PaymentModal } from '@/components/PaymentModal';
+import { PaymentRequests } from '@/components/PaymentRequests';
 import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
 import { Name, Avatar } from '@coinbase/onchainkit/identity';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { Transaction } from '@/lib/types';
 import { generateTransactionId } from '@/lib/utils';
-import { MessageCircle, History, Wallet as WalletIcon } from 'lucide-react';
+import { MessageCircle, History, Wallet as WalletIcon, Users } from 'lucide-react';
 
 export default function PayChatApp() {
   const { setFrameReady } = useMiniKit();
-  const [activeTab, setActiveTab] = useState<'chat' | 'history' | 'wallet'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'history' | 'requests' | 'wallet'>('chat');
   const [currentUserId] = useState('user123'); // Mock current user
   const [paymentModal, setPaymentModal] = useState<{
     isOpen: boolean;
     data?: any;
   }>({ isOpen: false });
   
-  // Mock transaction data
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      transactionId: 'tx_1',
-      fromUserId: 'alice',
-      toUserId: 'user123',
-      amount: '0.05',
-      currency: 'ETH',
-      timestamp: new Date(Date.now() - 86400000), // 1 day ago
-      status: 'completed',
-      txHash: '0x1234567890abcdef',
-    },
-    {
-      transactionId: 'tx_2',
-      fromUserId: 'user123',
-      toUserId: 'bob',
-      amount: '0.02',
-      currency: 'ETH',
-      timestamp: new Date(Date.now() - 3600000), // 1 hour ago
-      status: 'completed',
-      txHash: '0xabcdef1234567890',
-    },
-    {
-      transactionId: 'tx_3',
-      fromUserId: 'user123',
-      toUserId: 'charlie',
-      amount: '0.01',
-      currency: 'ETH',
-      timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
-      status: 'pending',
-    },
-  ]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setFrameReady();
+    fetchTransactions();
   }, [setFrameReady]);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch(`/api/transactions?userId=${currentUserId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data.transactions.map((tx: any) => ({
+          ...tx,
+          timestamp: new Date(tx.timestamp),
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePaymentInitiated = (paymentData: any) => {
     setPaymentModal({
@@ -65,41 +54,73 @@ export default function PayChatApp() {
     });
   };
 
-  const handleSplitInitiated = (splitData: any) => {
-    // Handle split bill creation
-    console.log('Split initiated:', splitData);
-    // In a real app, this would create a payment request
+  const handleSplitInitiated = async (splitData: any) => {
+    try {
+      // Create payment request via API
+      const response = await fetch('/api/payment-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requestorUserId: currentUserId,
+          description: splitData.description || 'Split payment',
+          totalAmount: splitData.totalAmount,
+          currency: 'ETH',
+          participants: splitData.participants,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Payment request created:', data.paymentRequest);
+        // You could show a success message or update UI here
+      } else {
+        console.error('Failed to create payment request');
+      }
+    } catch (error) {
+      console.error('Error creating payment request:', error);
+    }
   };
 
   const handlePaymentConfirm = async () => {
     if (!paymentModal.data) return;
     
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Add new transaction
-    const newTransaction: Transaction = {
-      transactionId: generateTransactionId(),
-      fromUserId: currentUserId,
-      toUserId: paymentModal.data.recipient,
-      amount: paymentModal.data.amount,
-      currency: paymentModal.data.currency,
-      timestamp: new Date(),
-      status: 'pending',
-    };
-    
-    setTransactions(prev => [newTransaction, ...prev]);
-    
-    // Simulate transaction confirmation after 5 seconds
-    setTimeout(() => {
-      setTransactions(prev => 
-        prev.map(tx => 
-          tx.transactionId === newTransaction.transactionId
-            ? { ...tx, status: 'completed' as const, txHash: '0x' + Math.random().toString(16).substr(2, 40) }
-            : tx
-        )
-      );
-    }, 5000);
+    try {
+      // Create transaction via API
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fromUserId: currentUserId,
+          toUserId: paymentModal.data.recipient,
+          amount: paymentModal.data.amount,
+          currency: paymentModal.data.currency,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const newTransaction = {
+          ...data.transaction,
+          timestamp: new Date(data.transaction.timestamp),
+        };
+        
+        setTransactions(prev => [newTransaction, ...prev]);
+        setPaymentModal({ isOpen: false });
+        
+        // Refresh transactions to get updates
+        setTimeout(() => {
+          fetchTransactions();
+        }, 6000);
+      } else {
+        console.error('Failed to create transaction');
+      }
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+    }
   };
 
   const handleTransactionClick = (transaction: Transaction) => {
@@ -110,12 +131,23 @@ export default function PayChatApp() {
   const tabs = [
     { id: 'chat' as const, label: 'Chat', icon: MessageCircle },
     { id: 'history' as const, label: 'History', icon: History },
+    { id: 'requests' as const, label: 'Requests', icon: Users },
     { id: 'wallet' as const, label: 'Wallet', icon: WalletIcon },
   ];
 
+  const getTitle = () => {
+    switch (activeTab) {
+      case 'chat': return 'PayChat';
+      case 'history': return 'Transaction History';
+      case 'requests': return 'Payment Requests';
+      case 'wallet': return 'Wallet';
+      default: return 'PayChat';
+    }
+  };
+
   return (
     <AppShell
-      title={activeTab === 'chat' ? 'PayChat' : activeTab === 'history' ? 'Transaction History' : 'Wallet'}
+      title={getTitle()}
       rightAction={
         activeTab === 'wallet' ? (
           <Wallet>
@@ -142,6 +174,18 @@ export default function PayChatApp() {
             transactions={transactions}
             currentUserId={currentUserId}
             onTransactionClick={handleTransactionClick}
+            isLoading={isLoading}
+          />
+        )}
+        
+        {activeTab === 'requests' && (
+          <PaymentRequests
+            currentUserId={currentUserId}
+            onPaymentMade={(requestId, amount) => {
+              console.log('Payment made:', requestId, amount);
+              // Refresh transactions when a payment is made
+              fetchTransactions();
+            }}
           />
         )}
         

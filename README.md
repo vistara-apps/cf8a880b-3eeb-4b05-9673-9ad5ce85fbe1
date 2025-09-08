@@ -1,6 +1,8 @@
-# PayChat - Base Mini App
+# PayChat - Base MiniApp
 
-A conversational payment app for Farcaster users to easily split bills and send payments within their social graph.
+**Chat. Split. Pay. All in one.**
+
+PayChat is a conversational payment app for Farcaster users to easily split bills and send payments within their social graph, built as a Base MiniApp.
 
 ## Features
 

@@ -55,7 +55,7 @@ export function AgentChat({
       userId: currentUserId,
       content: inputValue,
       timestamp: new Date(),
-      type: command.type || 'message',
+      type: command.type === 'pay' ? 'payment' : command.type || 'message',
       paymentData: command.type ? {
         amount: command.amount || '0',
         currency: command.currency || 'ETH',
@@ -79,9 +79,9 @@ export function AgentChat({
           timestamp: new Date(),
           type: 'payment',
           paymentData: {
-            amount: command.amount,
+            amount: command.amount || '0',
             currency: command.currency || 'ETH',
-            recipient: command.recipient,
+            recipient: command.recipient || '',
           },
         };
         setMessages(prev => [...prev, responseMessage]);
@@ -89,9 +89,9 @@ export function AgentChat({
         
         onPaymentInitiated?.({
           transactionId: generateTransactionId(),
-          recipient: command.recipient,
-          amount: command.amount,
-          currency: command.currency,
+          recipient: command.recipient || '',
+          amount: command.amount || '0',
+          currency: command.currency || 'ETH',
         });
       }, 1000);
     } else if (command.type === 'split' && command.participants && command.amount) {
@@ -100,13 +100,13 @@ export function AgentChat({
         const responseMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           userId: 'system',
-          content: `Split request created! ${command.participants.length} participants will each pay ${(parseFloat(command.amount) / command.participants.length).toFixed(3)} ETH`,
+          content: `Split request created! ${command.participants?.length || 0} participants will each pay ${(parseFloat(command.amount || '0') / (command.participants?.length || 1)).toFixed(3)} ETH`,
           timestamp: new Date(),
           type: 'split',
           paymentData: {
-            amount: command.amount,
+            amount: command.amount || '0',
             currency: 'ETH',
-            participants: command.participants,
+            participants: command.participants || [],
           },
         };
         setMessages(prev => [...prev, responseMessage]);
@@ -114,9 +114,9 @@ export function AgentChat({
         
         onSplitInitiated?.({
           requestId: generateTransactionId(),
-          description: command.description,
-          totalAmount: command.amount,
-          participants: command.participants,
+          description: command.description || 'Split payment',
+          totalAmount: command.amount || '0',
+          participants: command.participants || [],
         });
       }, 1000);
     } else if (command.type) {
