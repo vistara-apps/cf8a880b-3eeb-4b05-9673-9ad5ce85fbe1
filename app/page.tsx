@@ -59,9 +59,20 @@ export default function PayChatApp() {
   }, [setFrameReady]);
 
   const handlePaymentInitiated = (paymentData: any) => {
+    // Mock wallet addresses for demo purposes
+    const mockAddresses: { [key: string]: string } = {
+      'alice': '0x742d35Cc6634C0532925a3b8D0C9e3e8d4C4A8B9',
+      'bob': '0x8ba1f109551bD432803012645Hac136c0c8b3e8d',
+      'charlie': '0x9c8e7d6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d',
+    };
+
     setPaymentModal({
       isOpen: true,
-      data: paymentData,
+      data: {
+        ...paymentData,
+        recipientAddress: mockAddresses[paymentData.recipient] || '0x742d35Cc6634C0532925a3b8D0C9e3e8d4C4A8B9',
+        currency: paymentData.currency === 'ETH' ? 'ETH' : 'USDC', // Ensure proper typing
+      },
     });
   };
 
@@ -71,13 +82,10 @@ export default function PayChatApp() {
     // In a real app, this would create a payment request
   };
 
-  const handlePaymentConfirm = async () => {
+  const handlePaymentConfirm = async (txHash?: string) => {
     if (!paymentModal.data) return;
     
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Add new transaction
+    // Add new transaction with x402 details
     const newTransaction: Transaction = {
       transactionId: generateTransactionId(),
       fromUserId: currentUserId,
@@ -85,21 +93,26 @@ export default function PayChatApp() {
       amount: paymentModal.data.amount,
       currency: paymentModal.data.currency,
       timestamp: new Date(),
-      status: 'pending',
+      status: txHash ? 'pending' : 'pending',
+      txHash: txHash,
     };
     
     setTransactions(prev => [newTransaction, ...prev]);
     
-    // Simulate transaction confirmation after 5 seconds
-    setTimeout(() => {
-      setTransactions(prev => 
-        prev.map(tx => 
-          tx.transactionId === newTransaction.transactionId
-            ? { ...tx, status: 'completed' as const, txHash: '0x' + Math.random().toString(16).substr(2, 40) }
-            : tx
-        )
-      );
-    }, 5000);
+    // If we have a transaction hash, the x402 payment was successful
+    // The transaction will be updated to 'completed' by the PaymentModal
+    if (txHash) {
+      // Update transaction to completed after a short delay to simulate confirmation
+      setTimeout(() => {
+        setTransactions(prev => 
+          prev.map(tx => 
+            tx.transactionId === newTransaction.transactionId
+              ? { ...tx, status: 'completed' as const }
+              : tx
+          )
+        );
+      }, 3000);
+    }
   };
 
   const handleTransactionClick = (transaction: Transaction) => {
@@ -153,14 +166,26 @@ export default function PayChatApp() {
               </div>
               <h2 className="text-heading text-text mb-4">Connect Your Wallet</h2>
               <p className="text-body text-text-secondary mb-6">
-                Connect your wallet to start sending and receiving payments on Base.
+                Connect your wallet to start sending x402 payments on Base.
               </p>
               <Wallet>
-                <ConnectWallet className="w-full">
+                <ConnectWallet className="w-full mb-4">
                   <Avatar className="h-6 w-6" />
                   <Name />
                 </ConnectWallet>
               </Wallet>
+              
+              {/* Test x402 Payment Button */}
+              <button
+                onClick={() => handlePaymentInitiated({
+                  recipient: 'alice',
+                  amount: '0.01',
+                  currency: 'USDC'
+                })}
+                className="w-full mt-4 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors duration-200 text-sm"
+              >
+                Test x402 Payment (0.01 USDC to Alice)
+              </button>
             </div>
           </div>
         )}
