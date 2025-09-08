@@ -5,7 +5,8 @@ import { ChatMessage } from '@/lib/types';
 import { parsePaymentCommand, generateTransactionId } from '@/lib/utils';
 import { UserAvatar } from './UserAvatar';
 import { PaymentButton } from './PaymentButton';
-import { Send, DollarSign, Users } from 'lucide-react';
+import { CommandHelper } from './CommandHelper';
+import { Send, DollarSign, Users, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AgentChatProps {
@@ -33,6 +34,7 @@ export function AgentChat({
   
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCommandHelper, setShowCommandHelper] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -161,27 +163,49 @@ export function AgentChat({
       variant === 'compact' ? 'h-96' : 'h-full'
     )}>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div 
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        role="log"
+        aria-label="Chat messages"
+        aria-live="polite"
+      >
+        {isProcessing && (
+          <div className="flex justify-start">
+            <div className="chat-bubble received">
+              <div className="flex items-center gap-2">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-text-secondary rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+                <span className="text-caption text-text-secondary">PayChat is typing...</span>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {messages.map((message) => (
           <div
             key={message.id}
             className={cn(
-              'flex gap-3',
+              'flex gap-3 animate-fade-in',
               message.userId === currentUserId ? 'justify-end' : 'justify-start'
             )}
+            role="article"
+            aria-label={`Message from ${message.userId === currentUserId ? 'you' : message.userId === 'system' ? 'PayChat' : message.userId}`}
           >
             {message.userId !== currentUserId && message.userId !== 'system' && (
               <UserAvatar
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${message.userId}`}
-                alt={message.userId}
+                alt={`${message.userId} avatar`}
                 size="small"
               />
             )}
             
             <div className={cn(
-              'chat-bubble max-w-xs',
+              'chat-bubble max-w-xs interactive-element',
               message.userId === currentUserId ? 'sent' : 'received',
-              message.userId === 'system' && 'bg-gray-800 text-gray-300 mx-auto text-center text-sm'
+              message.userId === 'system' && 'bg-surface/60 text-text-secondary mx-auto text-center text-sm border border-gray-700/30'
             )}>
               <p className="text-body">{message.content}</p>
               
@@ -238,9 +262,13 @@ export function AgentChat({
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700/30" role="region" aria-label="Message input">
         <div className="flex gap-2">
+          <label htmlFor="chat-input" className="sr-only">
+            Type a message or payment command
+          </label>
           <input
+            id="chat-input"
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -248,6 +276,8 @@ export function AgentChat({
             placeholder="Type a message or /pay @user amount ETH"
             className="input-field flex-1"
             disabled={isProcessing}
+            aria-describedby="input-help"
+            autoComplete="off"
           />
           <PaymentButton
             variant="primary"
@@ -255,26 +285,48 @@ export function AgentChat({
             disabled={!inputValue.trim() || isProcessing}
             loading={isProcessing}
             className="px-3"
+            aria-label={isProcessing ? "Sending message..." : "Send message"}
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4" aria-hidden="true" />
           </PaymentButton>
         </div>
         
-        <div className="flex gap-2 mt-2">
+        <div className="flex gap-2 mt-2" role="group" aria-label="Quick actions">
           <button
             onClick={() => setInputValue('/pay @alice 0.01 ETH')}
-            className="text-xs bg-surface px-2 py-1 rounded text-text-secondary hover:text-text transition-colors duration-200"
+            className="text-xs bg-surface px-2 py-1 rounded text-text-secondary hover:text-text hover:bg-surface-hover focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors duration-200"
+            aria-label="Insert quick pay command"
           >
             Quick Pay
           </button>
           <button
             onClick={() => setInputValue('/split dinner 0.05 @alice @bob')}
-            className="text-xs bg-surface px-2 py-1 rounded text-text-secondary hover:text-text transition-colors duration-200"
+            className="text-xs bg-surface px-2 py-1 rounded text-text-secondary hover:text-text hover:bg-surface-hover focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors duration-200"
+            aria-label="Insert split bill command"
           >
             Split Bill
           </button>
+          <button
+            onClick={() => setShowCommandHelper(true)}
+            className="text-xs bg-surface px-2 py-1 rounded text-text-secondary hover:text-text hover:bg-surface-hover focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors duration-200 flex items-center gap-1"
+            aria-label="Show command help"
+          >
+            <HelpCircle className="w-3 h-3" />
+            Help
+          </button>
+        </div>
+        
+        <div id="input-help" className="sr-only">
+          Use /pay @username amount ETH to send payments, or /split description amount @user1 @user2 to split bills
         </div>
       </div>
+
+      {/* Command Helper Modal */}
+      <CommandHelper
+        isOpen={showCommandHelper}
+        onClose={() => setShowCommandHelper(false)}
+        onCommandSelect={(command) => setInputValue(command)}
+      />
     </div>
   );
 }

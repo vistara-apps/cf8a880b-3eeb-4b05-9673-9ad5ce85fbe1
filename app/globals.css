@@ -27,27 +27,27 @@
 
 @layer components {
   .glass-card {
-    @apply bg-surface/80 backdrop-blur-sm border border-gray-700/50 rounded-lg shadow-card;
+    @apply bg-surface/90 backdrop-blur-md border border-gray-700/30 rounded-lg shadow-card;
   }
   
   .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-all duration-200 shadow-lg hover:shadow-xl;
+    @apply bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-hover focus:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-surface text-text border border-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-surface/80 transition-all duration-200;
+    @apply bg-surface text-text border border-gray-700/50 px-6 py-3 rounded-lg font-medium hover:bg-surface-hover focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition-all duration-200;
   }
   
   .input-field {
-    @apply bg-surface border border-gray-700 rounded-lg px-4 py-3 text-text placeholder-text-secondary focus:border-primary focus:outline-none transition-colors duration-200;
+    @apply bg-surface border border-gray-700/50 rounded-lg px-4 py-3 text-text placeholder-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200;
   }
   
   .chat-bubble {
-    @apply bg-surface rounded-lg p-4 max-w-xs shadow-card;
+    @apply bg-surface/95 rounded-2xl p-4 max-w-xs shadow-card backdrop-blur-sm;
   }
   
   .chat-bubble.sent {
-    @apply bg-primary text-white ml-auto;
+    @apply bg-primary text-white ml-auto shadow-lg;
   }
   
   .chat-bubble.received {
@@ -55,28 +55,134 @@
   }
   
   .transaction-item {
-    @apply glass-card p-4 hover:bg-surface/60 transition-all duration-200 cursor-pointer;
+    @apply glass-card p-4 hover:bg-surface-hover focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200 cursor-pointer;
   }
   
   .payment-button {
-    @apply bg-accent text-white px-4 py-2 rounded-md font-medium hover:bg-accent/90 transition-all duration-200 shadow-md hover:shadow-lg;
+    @apply bg-accent text-white px-4 py-2 rounded-lg font-medium hover:bg-accent-hover focus:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all duration-200 shadow-md hover:shadow-lg active:scale-95;
+  }
+  
+  /* Enhanced interactive states */
+  .interactive-element {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .interactive-element:hover {
+    @apply transform scale-[1.02];
+  }
+  
+  .interactive-element:active {
+    @apply transform scale-[0.98];
+  }
+  
+  /* Loading states */
+  .loading-shimmer {
+    @apply animate-pulse bg-gradient-to-r from-surface via-surface-hover to-surface bg-[length:200%_100%];
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* Status indicators */
+  .status-success {
+    @apply text-success bg-success/10 border-success/20;
+  }
+  
+  .status-warning {
+    @apply text-warning bg-warning/10 border-warning/20;
+  }
+  
+  .status-error {
+    @apply text-error bg-error/10 border-error/20;
   }
 }
 
 @layer utilities {
   .text-display {
-    @apply text-3xl font-bold;
+    @apply text-display text-text font-bold tracking-tight;
   }
   
   .text-heading {
-    @apply text-xl font-semibold;
+    @apply text-heading text-text font-semibold tracking-tight;
+  }
+  
+  .text-subheading {
+    @apply text-subheading text-text font-medium;
   }
   
   .text-body {
-    @apply text-base font-normal;
+    @apply text-body text-text;
   }
   
   .text-caption {
-    @apply text-sm font-normal;
+    @apply text-caption text-text-secondary;
+  }
+  
+  .text-micro {
+    @apply text-micro text-text-muted;
+  }
+  
+  /* Payment amount styling */
+  .text-amount {
+    @apply text-xl font-bold text-text tabular-nums;
+  }
+  
+  .text-amount-large {
+    @apply text-2xl font-bold text-text tabular-nums;
+  }
+  
+  /* Status text */
+  .text-success {
+    @apply text-success font-medium;
+  }
+  
+  .text-warning {
+    @apply text-warning font-medium;
+  }
+  
+  .text-error {
+    @apply text-error font-medium;
+  }
+  
+  /* Mobile optimizations */
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  /* Touch optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .interactive-element:hover {
+      transform: none;
+    }
+    
+    .interactive-element:active {
+      transform: scale(0.95);
+    }
+  }
+  
+  /* Animations */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out;
   }
 }
