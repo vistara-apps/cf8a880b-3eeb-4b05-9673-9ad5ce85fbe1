@@ -4,18 +4,22 @@ A conversational payment app for Farcaster users to easily split bills and send 
 
 ## Features
 
-- **In-Chat Payments**: Send cryptocurrency payments directly within conversations using commands like `/pay @user 0.01 ETH`
+- **x402 Payment Protocol**: Integrated x402-axios for secure, efficient payments on Base
+- **In-Chat Payments**: Send cryptocurrency payments directly within conversations using commands like `/pay @user 0.01 USDC`
 - **Group Payment Splitting**: Create group payment requests with `/split dinner $50 @user1 @user2 @user3`
-- **Transaction History**: View and track all payments and outstanding debts
-- **Base Network Integration**: Fast and low-cost transactions on Base L2
+- **Transaction History**: View and track all payments with real transaction confirmations
+- **Base Network Integration**: Fast and low-cost transactions on Base L2 with USDC support
+- **Real-time Transaction Monitoring**: Live transaction status updates and confirmations
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Blockchain**: Base (Ethereum L2)
-- **Wallet Integration**: OnchainKit + MiniKit
+- **Payment Protocol**: x402-axios for secure payment processing
+- **Wallet Integration**: Wagmi + OnchainKit + MiniKit
 - **Styling**: Tailwind CSS with custom design system
 - **TypeScript**: Full type safety throughout
+- **State Management**: React Query for async state
 
 ## Getting Started
 
@@ -43,8 +47,9 @@ A conversational payment app for Farcaster users to easily split bills and send 
 
 ### Payment Commands
 
-- **Send Payment**: `/pay @username amount ETH`
-  - Example: `/pay @alice 0.01 ETH`
+- **Send Payment**: `/pay @username amount USDC`
+  - Example: `/pay @alice 0.01 USDC`
+  - Supports both USDC and ETH on Base
 
 - **Split Bill**: `/split description amount @user1 @user2`
   - Example: `/split dinner 0.05 @alice @bob`
@@ -52,9 +57,35 @@ A conversational payment app for Farcaster users to easily split bills and send 
 ### Features
 
 1. **Chat Interface**: Natural conversation flow with payment commands
-2. **Transaction History**: View all sent, received, and pending transactions
-3. **Wallet Integration**: Connect your wallet to send real payments on Base
-4. **Mobile-First Design**: Optimized for mobile Farcaster clients
+2. **x402 Payment Processing**: Secure, efficient payments using x402 protocol
+3. **Transaction History**: View all sent, received, and pending transactions with real confirmations
+4. **Wallet Integration**: Connect your wallet to send real USDC/ETH payments on Base
+5. **Mobile-First Design**: Optimized for mobile Farcaster clients
+6. **Real-time Updates**: Live transaction status and confirmation monitoring
+
+## x402 Integration
+
+PayChat uses the x402 payment protocol for secure, efficient transactions on Base:
+
+### Key Features
+- **Wagmi Integration**: Uses `useWalletClient` hook for wallet connectivity
+- **USDC Support**: Native USDC payments on Base (contract: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`)
+- **Transaction Verification**: Real-time transaction confirmation monitoring
+- **Error Handling**: Comprehensive error handling for payment failures
+- **Base Network**: Optimized for Base L2 with low fees and fast confirmations
+
+### Payment Flow
+1. User initiates payment through chat or test button
+2. x402-axios creates secure payment request
+3. Wallet client processes transaction on Base
+4. Real-time monitoring of transaction status
+5. Confirmation and history update
+
+### Testing
+- Connect wallet in the app
+- Use "Test x402 Payment" button in wallet tab
+- Monitor transaction on BaseScan
+- Verify payment appears in transaction history
 
 ## Architecture
 
