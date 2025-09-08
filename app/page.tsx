@@ -130,23 +130,42 @@ export default function PayChatApp() {
       {/* Tab Content */}
       <div className="flex-1 flex flex-col">
         {activeTab === 'chat' && (
-          <AgentChat
-            currentUserId={currentUserId}
-            onPaymentInitiated={handlePaymentInitiated}
-            onSplitInitiated={handleSplitInitiated}
-          />
+          <div
+            id="chat-panel"
+            role="tabpanel"
+            aria-labelledby="chat-tab"
+            className="flex-1 flex flex-col"
+          >
+            <AgentChat
+              currentUserId={currentUserId}
+              onPaymentInitiated={handlePaymentInitiated}
+              onSplitInitiated={handleSplitInitiated}
+            />
+          </div>
         )}
         
         {activeTab === 'history' && (
-          <TransactionHistory
-            transactions={transactions}
-            currentUserId={currentUserId}
-            onTransactionClick={handleTransactionClick}
-          />
+          <div
+            id="history-panel"
+            role="tabpanel"
+            aria-labelledby="history-tab"
+            className="flex-1 flex flex-col"
+          >
+            <TransactionHistory
+              transactions={transactions}
+              currentUserId={currentUserId}
+              onTransactionClick={handleTransactionClick}
+            />
+          </div>
         )}
         
         {activeTab === 'wallet' && (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div
+            id="wallet-panel"
+            role="tabpanel"
+            aria-labelledby="wallet-tab"
+            className="flex-1 flex flex-col items-center justify-center p-8"
+          >
             <div className="glass-card p-8 text-center max-w-sm w-full">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <WalletIcon className="w-8 h-8 text-primary" />
@@ -167,19 +186,27 @@ export default function PayChatApp() {
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="glass-card rounded-none border-x-0 border-b-0 p-4">
+      <nav 
+        className="glass-card rounded-none border-x-0 border-b-0 p-4 safe-area-bottom"
+        role="tablist"
+        aria-label="Main navigation"
+      >
         <div className="flex justify-around">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors duration-200 ${
+              className={`flex flex-col items-center gap-1 p-3 rounded-lg transition-all duration-200 min-h-[44px] min-w-[44px] interactive-element ${
                 activeTab === id
-                  ? 'text-primary bg-primary/10'
-                  : 'text-text-secondary hover:text-text hover:bg-surface'
+                  ? 'text-primary bg-primary/10 scale-105'
+                  : 'text-text-secondary hover:text-text hover:bg-surface-hover focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary/30'
               }`}
+              role="tab"
+              aria-selected={activeTab === id}
+              aria-controls={`${id}-panel`}
+              aria-label={`Switch to ${label} tab`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-5 h-5" aria-hidden="true" />
               <span className="text-xs font-medium">{label}</span>
             </button>
           ))}
