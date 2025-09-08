@@ -1,0 +1,30 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "1",
+    "name": "PayChat",
+    "subtitle": "Built with Zara",
+    "description": "PayChat is a Base Mini App built with Zara.",
+    "iconUrl": "https://0co.to/images/zara-2.png",
+    "homeUrl": "https://cf8a880b3eeb4b0596739ad5ce85fbe1-etv9.vercel.app",
+    "splashImageUrl": "https://cf8a880b3eeb4b0596739ad5ce85fbe1-etv9.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "heroImageUrl": "https://cf8a880b3eeb4b0596739ad5ce85fbe1-etv9.vercel.app/image.png",
+    "tagline": "PayChat",
+    "screenshotUrls": [
+      "https://cf8a880b3eeb4b0596739ad5ce85fbe1-etv9.vercel.app/screenshot.png",
+      "https://cf8a880b3eeb4b0596739ad5ce85fbe1-etv9.vercel.app/screenshot.png"
+    ],
+    "primaryCategory": "social",
+    "tags": [
+      "base",
+      "miniapp",
+      "onchainkit"
+    ],
+    "webhookUrl": "https://cf8a880b3eeb4b0596739ad5ce85fbe1-etv9.vercel.app/api/webhook"
+  }
+}
