@@ -9,12 +9,14 @@ interface TransactionHistoryProps {
   transactions: Transaction[];
   currentUserId: string;
   onTransactionClick?: (transaction: Transaction) => void;
+  isLoading?: boolean;
 }
 
 export function TransactionHistory({
   transactions,
   currentUserId,
   onTransactionClick,
+  isLoading = false,
 }: TransactionHistoryProps) {
   const [filter, setFilter] = useState<'all' | 'sent' | 'received' | 'pending'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +75,12 @@ export function TransactionHistory({
 
       {/* Transaction List */}
       <div className="flex-1 overflow-y-auto">
-        {filteredTransactions.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+            <p className="text-body text-text-secondary">Loading transactions...</p>
+          </div>
+        ) : filteredTransactions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-8 text-center">
             <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mb-4">
               <Search className="w-8 h-8 text-text-secondary" />
